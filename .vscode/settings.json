@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "cl.h": "c",
+        "stdlib.h": "c",
+        "ostream": "c",
+        "atomic": "c",
+        "condition_variable": "c",
+        "__mutex_base": "c"
+    }
+}
