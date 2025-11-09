@@ -14,19 +14,21 @@ int main(int argc, char **argv)
     double start_time, end_time, elapsed;
 
     long N;
+    int T;
     double estimated_pi = 0;
 
     //Comprobación de Parámetros
-    if(argc == 0)
+    if(argc < 3)
     {
         perror("ERROR: No hay suficientes paramámetros introducidos\n");
         exit(EXIT_FAILURE);
     }
     
     N = atoi(argv[1]);
+    T = atoi(argv[2]);
 
     // Ajustamos el nº de hilos que ejecutan el programa
-    omp_set_num_threads(32);
+    omp_set_num_threads(T);
     start_time = omp_get_wtime();
     // Hacemos la suma de los inversos al cuadrado
     #pragma omp parallel for reduction(+:estimated_pi)

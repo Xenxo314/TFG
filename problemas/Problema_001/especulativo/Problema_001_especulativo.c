@@ -3,10 +3,28 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define THREADS 6
 
+
+// AVISO IMPORTANTISIMO: Si ves que el programa está yendo más lento de lo esperado, recuerda que tienes que activar la cancelación 
+// export $OMP_CANCELLATION=true, sino no se mejora el tiempo de ejecución.
 int main(int argc, char** argv) {
-    omp_set_num_threads(THREADS);        // Numero total de hilos disponibles
+
+
+    long N; // Tamaño del Problema
+    int T;  //Numero de hilos que se usaran
+
+    //Comprobación de Parámetros
+    if(argc < 3)
+    {
+        perror("ERROR: No hay suficientes paramámetros introducidos\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    N = atoi(argv[1]);  
+    T = atoi(argv[2]);
+
+
+    omp_set_num_threads(T);        // Numero total de hilos disponibles
     omp_set_nested(1);                   // Activamos el paralelismo Aninado
 
     double estimated_pi_S = 0.0;        // PI static
@@ -16,22 +34,13 @@ int main(int argc, char** argv) {
     volatile char winner = 'X';     // S -> Static, D -> Dynamic, G -> Guided
     const volatile char * ptr_winner = &(winner);   // Usamos un puntero porque si usáramos la variable winner, cada for "cachearía" su valor y no serviría de flag (Por lo menos en mi ordenador)
 
-    long N; // Tamaño del Problema
-
-    //Comprobación de Parámetros
-    if(argc == 0)
-    {
-        perror("ERROR: No hay suficientes paramámetros introducidos\n");
-        exit(EXIT_FAILURE);
-    }
     
-    N = atoi(argv[1]);
     #pragma omp parallel sections shared(winner)
     {
         #pragma omp section 
         {
             // Ajustamos la cantidad de hilos de Esta sección
-            omp_set_num_threads(THREADS/3);
+            omp_set_num_threads(T/3);
 
             // Cómputo Paralelizable de PI
             #pragma omp parallel for schedule(static) reduction(+:estimated_pi_S) 
@@ -56,7 +65,7 @@ int main(int argc, char** argv) {
 
         #pragma omp section
         {
-            omp_set_num_threads(THREADS/3);
+            omp_set_num_threads(T/3);
             #pragma omp parallel for schedule(dynamic) reduction(+:estimated_pi_D) shared(winner)
             for (long j = N; j >= 1; j--) {
                 if(*(ptr_winner) != 'X'){
@@ -76,7 +85,7 @@ int main(int argc, char** argv) {
 
         #pragma omp section
         {
-            omp_set_num_threads(THREADS/3);
+            omp_set_num_threads(T/3);
             #pragma omp parallel for schedule(guided) reduction(+:estimated_pi_G)
             for (long k = N; k >= 1; k--) 
             {
