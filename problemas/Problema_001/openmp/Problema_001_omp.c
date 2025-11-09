@@ -4,7 +4,7 @@
 #include <time.h>
 #include <omp.h>
 
-#define N 1000000000
+
 
 // Programa que calcula PI como la raiz cuadrada de 6 veces la suma de inversos de los N-esimos primeros naturales.
 // sqrt(6*Σ(1/n^2))
@@ -13,7 +13,17 @@ int main(int argc, char **argv)
     // Variables que miden el tiempo
     double start_time, end_time, elapsed;
 
+    long N;
     double estimated_pi = 0;
+
+    //Comprobación de Parámetros
+    if(argc == 0)
+    {
+        perror("ERROR: No hay suficientes paramámetros introducidos\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    N = atoi(argv[1]);
 
     // Ajustamos el nº de hilos que ejecutan el programa
     omp_set_num_threads(32);

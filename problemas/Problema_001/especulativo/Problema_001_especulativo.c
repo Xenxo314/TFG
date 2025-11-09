@@ -3,19 +3,29 @@
 #include <math.h>
 #include <stdlib.h>
 
-#define N 100000
 #define THREADS 6
 
-int main() {
+int main(int argc, char** argv) {
     omp_set_num_threads(THREADS);        // Numero total de hilos disponibles
     omp_set_nested(1);                   // Activamos el paralelismo Aninado
 
-    double estimated_pi_S = 0.0;
-    double estimated_pi_D = 0.0;
-    double estimated_pi_G = 0.0;
+    double estimated_pi_S = 0.0;        // PI static
+    double estimated_pi_D = 0.0;        // PI dynamic
+    double estimated_pi_G = 0.0;        // PI guided
 
     volatile char winner = 'X';     // S -> Static, D -> Dynamic, G -> Guided
     const volatile char * ptr_winner = &(winner);   // Usamos un puntero porque si usáramos la variable winner, cada for "cachearía" su valor y no serviría de flag (Por lo menos en mi ordenador)
+
+    long N; // Tamaño del Problema
+
+    //Comprobación de Parámetros
+    if(argc == 0)
+    {
+        perror("ERROR: No hay suficientes paramámetros introducidos\n");
+        exit(EXIT_FAILURE);
+    }
+    
+    N = atoi(argv[1]);
     #pragma omp parallel sections shared(winner)
     {
         #pragma omp section 
