@@ -34,7 +34,9 @@ int main(int argc, char** argv) {
     volatile char winner = 'X';     // S -> Static, D -> Dynamic, G -> Guided
     const volatile char * ptr_winner = &(winner);   // Usamos un puntero porque si usáramos la variable winner, cada for "cachearía" su valor y no serviría de flag (Por lo menos en mi ordenador)
 
-    
+    double start, end; // Medidores de tiempo
+
+    start = omp_get_wtime();    
     #pragma omp parallel sections shared(winner)
     {
         #pragma omp section 
@@ -105,6 +107,9 @@ int main(int argc, char** argv) {
         }
     }
 
+    end = omp_get_wtime();
     printf("Winner = %c\n", winner);
+
+    printf("Elapsed time: %f seconds\n", end - start);
     return 0;
 }

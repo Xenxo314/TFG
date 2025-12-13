@@ -37,7 +37,6 @@ int main(int argc, char **argv)
     end = clock();
     cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-    printf("Estimated PI: %lf\n", estimated_pi);
     printf("TIME: %lf\n", cpu_time_used);
 
     return 0;
