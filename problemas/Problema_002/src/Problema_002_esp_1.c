@@ -31,6 +31,7 @@ int main(int argc, char *argv[])
     }
 
     double start = omp_get_wtime();
+
 #pragma omp parallel for schedule(runtime) reduction(+ : num_primos) num_threads(T)
     for (long long i = A; i <= A + B; i++)
     {
