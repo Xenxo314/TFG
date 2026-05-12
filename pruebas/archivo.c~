@@ -1,0 +1,32 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <omp.h>
+
+#define N 10000000000
+#define THREADS 4
+
+int main(int argc, char **argv)
+{
+    double start, end, elapsed;
+
+    double pi = 0;
+
+    
+
+    start = omp_get_wtime();
+    #pragma omp parallel for reduction(+:pi) schedule(static) num_threads(THREADS)
+    for( long long i = 0; i<N; i++)
+    {
+        pi += pow(-1,i)/(2*i+1);
+    }
+
+    pi *= 4;
+
+    end = omp_get_wtime();
+
+    elapsed = end - start;
+
+    printf("%lf\n",elapsed);
+    return 0;
+}

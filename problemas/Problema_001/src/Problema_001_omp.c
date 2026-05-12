@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     // Variables que miden el tiempo
     double start_time, end_time, elapsed;
 
-    long N;
+    long long N;
     int T;
     double estimated_pi = 0;
 
@@ -24,15 +24,15 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
     
-    N = atoi(argv[1]);
+    N = atoll(argv[1]);
     T = atoi(argv[2]);
 
     // Ajustamos el nº de hilos que ejecutan el programa
     omp_set_num_threads(T);
     start_time = omp_get_wtime();
     // Hacemos la suma de los inversos al cuadrado
-    #pragma omp parallel for reduction(+:estimated_pi)
-    for (long i = 1; i < N; i++)
+    #pragma omp parallel for reduction(+:estimated_pi) schedule(static)
+    for (long long i = 1; i < N; i++)
     {
         estimated_pi += 1 / (i * (double)i);
     }

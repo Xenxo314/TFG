@@ -1,0 +1,10 @@
+OMP_SCHEDULE=static
+Tiempos: 64 64 64 64 64 64 64 64 64 64
+Media: 64.0000000000
+Desviación típica: 0.0000000000
+
+OMP_SCHEDULE=guided
+Tiempos: 64 64 64 64 64 64 64 64 64 64
+Media: 64.0000000000
+Desviación típica: 0.0000000000
+
