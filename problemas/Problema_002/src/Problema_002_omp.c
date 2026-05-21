@@ -10,21 +10,20 @@
 int main(int argc, char *argv[])
 {
 
-    long long A, B;           // Parametros para primos
+    long long N;           // Parametros para primos
     int T;                    // Numero de hilos
     long long num_primos = 0; // Numero de primos entre A y A+B
-    if (argc < 4)
+    if (argc < 3)
     {
-        printf("ERROR: Uso ./%s <A> <B> <T>\n", argv[0]);
+        printf("ERROR: Uso ./%s <N> <T>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
     // Parseo de Argumentos
-    A = atoll(argv[1]);
-    B = atoll(argv[2]);
-    T = atoi(argv[3]);
+    N= atoll(argv[1]);
+    T = atoi(argv[2]);
 
-    if (A < 2 || B < 1 || T < 1)
+    if (N < 2 || T < 1)
     {
         printf("Argumentos inconsistentes\n");
         exit(EXIT_FAILURE);
@@ -32,7 +31,7 @@ int main(int argc, char *argv[])
 
     double start = omp_get_wtime();
 #pragma omp parallel for schedule(runtime) reduction(+ : num_primos) num_threads(T)
-    for (long long i = A; i <= A + B; i++)
+    for (long long i = 2; i <= N; i++)
     {
         int isprime = 1; // Todo numero es primo hasta que se demuestre lo contrario
         for (long long j = 2; j <= sqrt(i); j++)
@@ -50,7 +49,7 @@ int main(int argc, char *argv[])
     }
     double end = omp_get_wtime();
 
-    //printf("Num de primos encontrados: %lld\n", num_primos);
+    printf("Num de primos encontrados: %lld\n", num_primos);
     printf("TIME: %lf\n", end - start);
 
     return 0;
