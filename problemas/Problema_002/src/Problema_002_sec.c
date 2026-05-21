@@ -6,18 +6,17 @@
 int main(int argc, char *argv[])
 {
 
-    long long A, B;
+    long long N;
     int num_primos = 0;
-    if (argc < 3)
+    if (argc < 2)
     {
-        printf("ERROR: Uso ./%s <A> <B>\n", argv[0]);
+        printf("ERROR: Uso ./%s <N>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
-    A = atoll(argv[1]);
-    B = atoll(argv[2]);
+    N = atoll(argv[1]);
     
-    if (A < 2 || B < 1)
+    if (N<2)
     {
         printf("Argumentos inconsistentes\n");
         exit(EXIT_FAILURE);
@@ -27,7 +26,7 @@ int main(int argc, char *argv[])
     
     clock_t inicio = clock();
 
-    for (long long i = A; i <= A + B; i++)
+    for (long long i = 2; i <= N; i++)
     {
         int isprime = 1;
         for (long long j = 2; j <= sqrt(i); j++)
