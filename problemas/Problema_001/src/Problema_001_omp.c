@@ -31,7 +31,7 @@ int main(int argc, char **argv)
     omp_set_num_threads(T);
     start_time = omp_get_wtime();
     // Hacemos la suma de los inversos al cuadrado
-    #pragma omp parallel for reduction(+:estimated_pi) schedule(static)
+    #pragma omp parallel for reduction(+:estimated_pi) schedule(runtime)
     for (long long i = 1; i < N; i++)
     {
         estimated_pi += 1 / (i * (double)i);
