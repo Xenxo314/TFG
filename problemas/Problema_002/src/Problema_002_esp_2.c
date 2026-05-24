@@ -32,8 +32,6 @@ double calc_std_dev(double *data, long N, int *T, double *std_perc)
     return std_dev;
 }
 
-
-
 int main(int argc, char **argv)
 {
     // METRICAS DE TIEMPO
@@ -52,11 +50,12 @@ int main(int argc, char **argv)
     long chunk = 1;     // Distancia entre iteraciones (De esta manera evitamos errores de medición) [OPT]
 
     // MEMORIA
-    struct rusage usage;// Tamaño de RSS
+    struct rusage usage; // Tamaño de RSS
 
     // OTRAS variables
-    long long N_d;     // Tamaño de la decisión
-    char winner = 'X'; // Indica la planificación ganadora
+    long long N_d;            // Tamaño de la decisión
+    char winner = 'X';        // Indica la planificación ganadora
+    long long init_value = 2; // Valor inicial del bucle
 
     // Variables de cómputo
     long long num_primos = 0;
@@ -82,14 +81,17 @@ int main(int argc, char **argv)
     N_d = N * p / 100.0f;
 
     // RESERVA de memoria
-    double *times = malloc(N_d / chunk * sizeof(double));
+    double *times = malloc(ceil((double)(N_d - init_value) / (double)chunk) * sizeof(double));
 
     // COMIENZA EL TIEMPO DE DECISIÓN
     start = omp_get_wtime();
 
-    for (long long i = 2; i < N_d; i++)
+    for (long long i = init_value; i < N_d; i++)
     {
-        start_i = omp_get_wtime();
+        if ((i - init_value) % chunk == 0)
+        {
+            start_i = omp_get_wtime();
+        }
 
         int isprime = 1;
         int contador = 1;
@@ -109,12 +111,12 @@ int main(int argc, char **argv)
                 num_primos++;
             }
         }
-        if (i % chunk == 0 || i == (N_d - 1))
+        if (chunk == 1 || (((i - init_value) % chunk) == (chunk - 1)) || i == (N_d - 1))
         {
             end_i = omp_get_wtime();
             if (end_i - start_i > EPSILON)
             {
-                times[(i-2) / chunk] = (end_i - start_i) / contador;
+                times[(i - init_value) / chunk] = (end_i - start_i) / contador;
             }
             else
             {
@@ -125,7 +127,7 @@ int main(int argc, char **argv)
     }
 
     // CALCULO MÉTRICAS
-    std_dev = calc_std_dev(times, N_d / chunk, &T, &desbalanceo);
+    std_dev = calc_std_dev(times, ceil((double)(N_d - init_value) / (double)chunk), &T, &desbalanceo);
 
     // Ajustamos el scheduler
     (desbalanceo < umbral) ? (omp_set_schedule(omp_sched_static, chunk), winner = 'S') : (omp_set_schedule(omp_sched_dynamic, chunk), winner = 'D');
@@ -167,8 +169,9 @@ int main(int argc, char **argv)
     printf("STD_DEV = %.15lf\n", std_dev);
     printf("DESBALANCEO = %.15lf\n", desbalanceo);
     printf("WINNER = %c\n", winner);
-    //printf("Num primos = %lld\n", num_primos);
-    printf("Max RSS = %ld\n", usage.ru_maxrss);  // Medido en KB
+    printf("Num primos = %lld\n", num_primos);
+    printf("Max RSS = %ld\n", usage.ru_maxrss); // Medido en KB
+
 
     // FREE
     free(times);

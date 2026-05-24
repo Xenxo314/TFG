@@ -53,8 +53,9 @@ int main(int argc, char **argv)
     struct rusage usage; // Tamaño de RSS
 
     // OTRAS variables
-    long long N_d;     // Tamaño de la decisión
-    char winner = 'X'; // Indica la planificación ganadora
+    long long N_d;            // Tamaño de la decisión
+    char winner = 'X';        // Indica la planificación ganadora
+    long long init_value = 1; // Valor inicial del bucle
 
     // Variables de cómputo
     double estimated_pi = 0;
@@ -80,14 +81,17 @@ int main(int argc, char **argv)
     N_d = N * p / 100.0f;
 
     // RESERVA de memoria
-    double *times = malloc(N_d / chunk * sizeof(double));
+    double *times = malloc(ceil((double)(N_d - init_value) / (double)chunk) * sizeof(double));
 
     // COMIENZA EL TIEMPO DE DECISIÓN
     start = omp_get_wtime();
 
-    for (long long i = 1; i < N_d; i++)
+    for (long long i = init_value; i < N_d; i++)
     {
-        start_i = omp_get_wtime();
+        if ((i - init_value) % chunk == 0)
+        {
+            start_i = omp_get_wtime();
+        }
 
         int contador = 1;
     repeat:
@@ -99,12 +103,12 @@ int main(int argc, char **argv)
         {
             double aux = 1 / (i * (double)i);
         }
-        if (i % chunk == 0 || i == (N_d - 1))
+        if (chunk == 1 || (((i - init_value) % chunk) == (chunk - 1)) || i == (N_d - 1))
         {
             end_i = omp_get_wtime();
             if (end_i - start_i > EPSILON)
             {
-                times[(i-1) / chunk] = (end_i - start_i) / contador;
+                times[(i - 1) / chunk] = (end_i - start_i) / contador;
             }
             else
             {
@@ -115,8 +119,7 @@ int main(int argc, char **argv)
     }
 
     // CALCULO MÉTRICAS
-    std_dev = calc_std_dev(times, N_d / chunk, &T, &desbalanceo);
-
+    std_dev = calc_std_dev(times, ceil((N_d - init_value) / chunk), &T, &desbalanceo);
     // Ajustamos el scheduler
     (desbalanceo < umbral) ? (omp_set_schedule(omp_sched_static, chunk), winner = 'S') : (omp_set_schedule(omp_sched_dynamic, chunk), winner = 'D');
 
@@ -141,7 +144,7 @@ int main(int argc, char **argv)
     // Medir memoria
     getrusage(RUSAGE_SELF, &usage);
 
-    printf("PI = %lf\n",estimated_pi);
+    printf("PI = %lf\n", estimated_pi);
     // PRINTS
     printf("TIME_TOT: %lf\n", time_tot);
     printf("TIME_DEC: %lf\n", time_dec);
@@ -149,7 +152,7 @@ int main(int argc, char **argv)
     printf("DESBALANCEO = %.15lf %%\n", desbalanceo);
     printf("WINNER = %c\n", winner);
     printf("Max RSS: %ld KB\n", usage.ru_maxrss);
-
+    
     // FREE
     free(times);
 
