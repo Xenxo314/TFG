@@ -119,7 +119,8 @@ int main(int argc, char **argv)
     }
 
     // CALCULO MÉTRICAS
-    std_dev = calc_std_dev(times, ceil((N_d - init_value) / chunk), &T, &desbalanceo);
+    std_dev = calc_std_dev(times, ceil((double)(N_d - init_value) / (double)chunk), &T, &desbalanceo);
+
     // Ajustamos el scheduler
     (desbalanceo < umbral) ? (omp_set_schedule(omp_sched_static, chunk), winner = 'S') : (omp_set_schedule(omp_sched_dynamic, chunk), winner = 'D');
 
@@ -152,7 +153,7 @@ int main(int argc, char **argv)
     printf("DESBALANCEO = %.15lf %%\n", desbalanceo);
     printf("WINNER = %c\n", winner);
     printf("Max RSS: %ld KB\n", usage.ru_maxrss);
-    
+
     // FREE
     free(times);
 
