@@ -7,7 +7,7 @@
 #define TOLERANCIA 1
 #define EPSILON 1e-7
 
-double calc_std_dev(double *data, long N, int *T, double *std_perc)
+double calc_std_dev(double *data, long long N, int *T, double *std_perc)
 {
     double sum = 0;
 #pragma omp parallel for reduction(+ : sum) schedule(static) num_threads(*T)

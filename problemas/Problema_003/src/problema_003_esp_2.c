@@ -63,7 +63,7 @@ void print_matrix(double **M, long long N)
     }
 }
 
-double calc_std_dev(double *data, long N, int *T, double *std_perc)
+double calc_std_dev(double *data, long long N, int *T, double *std_perc)
 {
     double sum = 0;
 #pragma omp parallel for reduction(+ : sum) schedule(static) num_threads(*T)
