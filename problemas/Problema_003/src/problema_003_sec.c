@@ -81,7 +81,6 @@ int main(int argc, char *argv[])
 
 
     long long N = atoll(argv[1]);
-    int T = atoi(argv[2]);
 
     srand(time(NULL));
 
