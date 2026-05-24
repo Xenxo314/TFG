@@ -32,8 +32,7 @@ double calc_std_dev(double *data, long N, int *T, double *std_perc)
     return std_dev;
 }
 
-// Programa que calcula PI como la raiz cuadrada de 6 veces la suma de inversos de los N-esimos primeros naturales.
-// sqrt(6*Σ(1/n^2))
+
 
 int main(int argc, char **argv)
 {
@@ -115,7 +114,7 @@ int main(int argc, char **argv)
             end_i = omp_get_wtime();
             if (end_i - start_i > EPSILON)
             {
-                times[i / chunk - 1] = (end_i - start_i) / contador;
+                times[(i-2) / chunk] = (end_i - start_i) / contador;
             }
             else
             {
@@ -166,11 +165,10 @@ int main(int argc, char **argv)
     printf("TIME_TOT: %lf\n", time_tot);
     printf("TIME_DEC: %lf\n", time_dec);
     printf("STD_DEV = %.15lf\n", std_dev);
-    printf("DESBALANCEO = %.15lf %%\n", desbalanceo);
+    printf("DESBALANCEO = %.15lf\n", desbalanceo);
     printf("WINNER = %c\n", winner);
-    printf("Num primos = %lld\n", num_primos);
-
-    printf("Max RSS: %ld KB\n", usage.ru_maxrss);
+    //printf("Num primos = %lld\n", num_primos);
+    printf("Max RSS = %ld\n", usage.ru_maxrss);  // Medido en KB
 
     // FREE
     free(times);

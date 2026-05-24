@@ -104,7 +104,7 @@ int main(int argc, char **argv)
             end_i = omp_get_wtime();
             if (end_i - start_i > EPSILON)
             {
-                times[i / chunk - 1] = (end_i - start_i) / contador;
+                times[(i-1) / chunk] = (end_i - start_i) / contador;
             }
             else
             {
