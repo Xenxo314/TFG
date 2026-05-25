@@ -74,15 +74,15 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
+    N = atoll(argv[1]) * p / 100.0; // realizamos el p% de las teraciones en este caso
+    T = atoi(argv[2]);
     p = atoi(argv[3]);
+    
     if (p > 100)
     {
         printf("No se admiten porcentajes mayores a 100\n");
         abort();
     }
-
-    N = atoll(argv[1]) * p / 100.0; // realizamos el p% de las teraciones en este caso
-    T = atoi(argv[2]);
 
     omp_set_num_threads(T); // Numero total de hilos disponibles
     omp_set_nested(1);      // Activamos el paralelismo Anidado
@@ -131,7 +131,7 @@ int main(int argc, char **argv)
             if (winner == 'X')
             {
                 winner = 'S';
-                //C = C_S;
+                C = C_S;
             }
         }
 
@@ -144,7 +144,7 @@ int main(int argc, char **argv)
             {
                 if (*(ptr_winner) != 'X')
                 {
-                    #pragma omp cancel for
+#pragma omp cancel for
                 }
                 for (long long j = 0; j < N; j++)
                 {
@@ -160,7 +160,7 @@ int main(int argc, char **argv)
             if (winner == 'X')
             {
                 winner = 'D';
-                //C = C_D;
+                C = C_D;
             }
         }
     }
@@ -170,10 +170,10 @@ int main(int argc, char **argv)
 
     printf("TIME: %f seconds\n", end - start);
 
-    free_matrix(A,N);
-    free_matrix(B,N);
-    free_matrix(C_S,N);
-    free_matrix(C_D,N);
+    free_matrix(A, N);
+    free_matrix(B, N);
+    free_matrix(C_S, N);
+    free_matrix(C_D, N);
 
     return 0;
 }
