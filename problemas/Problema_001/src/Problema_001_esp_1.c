@@ -9,12 +9,30 @@
 int main(int argc, char **argv)
 {
 
-    long long N_d, N;    // Tamaño del Problema y numero de chunks
-    int T;               // Numero de hilos que se usaran
-    int p;               // Porcentaje del tamaño del problema que se ejecutará
-    double time_tot;
-    double time_dec;
+    // METRICAS DE TIEMPO
+    double time_tot;   // tiempo total de ejecución (Sin reserva de memoria)
+    double time_dec;   // Tiempo de decisión
+    double start, end; // Marcadores del tiempo total
+    double end_d;      // Marcador del tiempo de decisión
+
+    // ARGUMENTOS
+    long long N;    // Tamaño del problema
+    int T;          // Numero de hilos
+    double p;       // Porcentaje de la decisión
+    long chunk = 0; // Distancia entre iteraciones (De esta manera evitamos errores de medición) [OPT]
+
+    // MEMORIA
     struct rusage usage; // Tamaño de RSS
+
+    // OTRAS variables
+    long long N_d;                               // Tamaño de la decisión
+    volatile char winner = 'X';                  // S -> Static, D -> Dynamic y X -> Por decidir
+    const volatile char *ptr_winner = &(winner); // Usamos un puntero porque si usáramos la variable winner, cada for "cachearía" su valor y no serviría de flag (Por lo menos en mi ordenador)
+
+    // Variables de cómputo
+    double estimated_pi_S = 0.0f; // PI static
+    double estimated_pi_D = 0.0f; // PI dynamic
+    double estimated_pi = 0.0f;   // Valor Final
 
     // Comprobación de Parámetros
     if (argc < 4)
@@ -23,28 +41,22 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
+    N = atoll(argv[1]);
+    T = atoi(argv[2]);
     p = atoi(argv[3]);
+    if (argc > 4)
+        chunk = atoi(argv[4]);
+
     if (p > 100)
     {
         printf("No se admiten porcentajes mayores a 100\n");
         abort();
     }
+    N_d = N / 100.0f * p;
 
-    N = atoll(argv[1]); // Tamaño real del problema
-    T = atoi(argv[2]);
-    N_d = N / 100.0f * p; // Numero de iteraciones para decidir la planificación
-
+    // Configuramos OMP correctamente
     omp_set_num_threads(T); // Numero total de hilos disponibles
     omp_set_nested(1);      // Activamos el paralelismo Aninado
-
-    double estimated_pi_S = 0.0f; // PI static
-    double estimated_pi_D = 0.0f; // PI dynamic
-    double estimated_pi = 0.0f;   // Valor Final
-
-    volatile char winner = 'X';                  // S -> Static, D -> Dynamic y X -> Por decidir
-    const volatile char *ptr_winner = &(winner); // Usamos un puntero porque si usáramos la variable winner, cada for "cachearía" su valor y no serviría de flag (Por lo menos en mi ordenador)
-
-    double start, end_d, end; // Medidores de tiempo
 
     start = omp_get_wtime();
 #pragma omp parallel sections shared(winner)
@@ -63,13 +75,12 @@ int main(int argc, char **argv)
                 estimated_pi_S += 1.0 / (i * (double)i);
             }
 
-// Si somos la primera planificación en acabar
 #pragma omp critical
             if (winner == 'X')
             {
                 winner = 'S';
                 estimated_pi = estimated_pi_S;
-                omp_set_schedule(omp_sched_static, 0);
+                omp_set_schedule(omp_sched_static, chunk);
             }
         }
 
@@ -90,11 +101,12 @@ int main(int argc, char **argv)
             {
                 winner = 'D';
                 estimated_pi = estimated_pi_D;
-                omp_set_schedule(omp_sched_dynamic, 0);
+                omp_set_schedule(omp_sched_dynamic, chunk);
             }
         }
     }
 
+    // Fin del tiempo de decisión
     end_d = omp_get_wtime();
 
 #pragma omp parallel for schedule(runtime) reduction(+ : estimated_pi) num_threads(T)
