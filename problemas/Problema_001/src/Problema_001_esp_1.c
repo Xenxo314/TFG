@@ -65,7 +65,7 @@ int main(int argc, char **argv)
         {
 
 // Cómputo Paralelizable de PI
-#pragma omp parallel for schedule(static) reduction(+ : estimated_pi_S) num_threads(T / 2)
+#pragma omp parallel for schedule(static, chunk) reduction(+ : estimated_pi_S) num_threads(T / 2)
             for (long long i = 1; i < N_d; i++)
             {
                 if (*(ptr_winner) != 'X')
@@ -86,7 +86,7 @@ int main(int argc, char **argv)
 
 #pragma omp section
         {
-#pragma omp parallel for schedule(dynamic) reduction(+ : estimated_pi_D) num_threads(T / 2)
+#pragma omp parallel for schedule(dynamic, chunk) reduction(+ : estimated_pi_D) num_threads(T / 2)
             for (long long i = 1; i < N_d; i++)
             {
                 if (*(ptr_winner) != 'X')
