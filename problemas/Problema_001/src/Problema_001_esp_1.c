@@ -2,15 +2,17 @@
 #include <omp.h>
 #include <math.h>
 #include <stdlib.h>
+#include <sys/resource.h>
 
 // ATENCIÓN: Si ves que el programa está yendo más lento de lo esperado, recuerda que tienes que activar la cancelación
 // export $OMP_CANCELLATION=true, sino no se mejora el tiempo de ejecución.
 int main(int argc, char **argv)
 {
 
-    long long N_d, N; // Tamaño del Problema y numero de chunks
-    int T;            // Numero de hilos que se usaran
-    int p;            // Porcentaje del tamaño del problema que se ejecutará
+    long long N_d, N;    // Tamaño del Problema y numero de chunks
+    int T;               // Numero de hilos que se usaran
+    int p;               // Porcentaje del tamaño del problema que se ejecutará
+    struct rusage usage; // Tamaño de RSS
 
     // Comprobación de Parámetros
     if (argc < 4)
@@ -26,9 +28,9 @@ int main(int argc, char **argv)
         abort();
     }
 
-    N_d = atoll(argv[1]) * p / 100.0; // Numero de iteraciones para decidir la planificación
-    N = atoll(argv[1]);               // Tamaño real del problema
+    N = atoll(argv[1]); // Tamaño real del problema
     T = atoi(argv[2]);
+    N_d = N / 100.0f * p; // Numero de iteraciones para decidir la planificación
 
     omp_set_num_threads(T); // Numero total de hilos disponibles
     omp_set_nested(1);      // Activamos el paralelismo Aninado
@@ -47,18 +49,16 @@ int main(int argc, char **argv)
     {
 #pragma omp section
         {
-            // Ajustamos la cantidad de hilos de Esta sección
-            omp_set_num_threads(T / 2);
 
 // Cómputo Paralelizable de PI
-#pragma omp parallel for schedule(static) reduction(+ : estimated_pi_S)
-            for (long i = 1; i < N_d; i++)
+#pragma omp parallel for schedule(static) reduction(+ : estimated_pi_S) num_threads(T / 2)
+            for (long long i = 1; i < N_d; i++)
             {
                 if (*(ptr_winner) != 'X')
                 {
 #pragma omp cancel for
                 }
-                estimated_pi_S += 1 / (i * (double)i);
+                estimated_pi_S += 1.0 / (i * (double)i);
             }
 
 // Si somos la primera planificación en acabar
@@ -73,15 +73,14 @@ int main(int argc, char **argv)
 
 #pragma omp section
         {
-            omp_set_num_threads(T / 2);
-#pragma omp parallel for schedule(dynamic) reduction(+ : estimated_pi_D)
-            for (long i = 1; i < N_d; i++)
+#pragma omp parallel for schedule(dynamic) reduction(+ : estimated_pi_D) num_threads(T/2)
+            for (long long i = 1; i < N_d; i++)
             {
                 if (*(ptr_winner) != 'X')
                 {
 #pragma omp cancel for
                 }
-                estimated_pi_D += 1 / (i * (double)i);
+                estimated_pi_D += 1.0f / (i * (double)i);
             }
 
 #pragma omp critical
@@ -96,17 +95,23 @@ int main(int argc, char **argv)
 
     end_d = omp_get_wtime();
 
-    #pragma omp parallel for schedule(runtime) num_threads(T)
-    for (int i = N_d; i < N; i++)
+#pragma omp parallel for schedule(runtime) reduction(+ : estimated_pi) num_threads(T)
+    for (long long i = N_d; i < N; i++)
     {
-        estimated_pi += 1 / (i * (double)i);
+        estimated_pi += 1.0f / (i * (double)i);
     }
 
     estimated_pi *= 6;
-    estimated_pi = sqrt(estimated_pi_D);
+    estimated_pi = sqrt(estimated_pi);
     end = omp_get_wtime();
+
+    getrusage(RUSAGE_SELF, &usage);
+
     printf("WINNER: %c\n", winner);
     printf("DECISSION_TIME: %f\n", end_d - start);
     printf("TOTAL_TIME: %f\n", end - start);
+    printf("RSS = %ld\n", usage.ru_maxrss);
+    printf("PI = %.15lf\n", estimated_pi);
+
     return 0;
 }
