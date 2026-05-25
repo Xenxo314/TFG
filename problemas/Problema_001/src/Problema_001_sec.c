@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <sys/resource.h>
+
 
 // Programa que calcula PI como la raiz cuadrada de 6 veces la suma de inversos de los N-esimos primeros naturales.
 // sqrt(6*Σ(1/n^2))
@@ -9,10 +11,12 @@ int main(int argc, char **argv)
 {
     // Variables que miden el tiempo
     clock_t start, end;
-    double cpu_time_used;
+    double time_tot;
 
-    long N; // Tamaño del Problema
+    long long N; // Tamaño del Problema
     double estimated_pi = 0;
+
+    struct rusage usage; // Tamaño de RSS
 
     //Comprobación de Parámetros
     if(argc < 2)
@@ -21,12 +25,12 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-    N = atoi(argv[1]);
+    N = atoll(argv[1]);
     start = clock();
     // Hacemos la suma de los inversos al cuadrado
-    for (double i = 1; i < N; i++)
+    for (long long i = 1; i < N; i++)
     {
-        estimated_pi += 1 / (i * i);
+        estimated_pi += 1 / (double)(i * i);
     }
 
     // Multiplicamos y Hacemos la raiz
@@ -35,9 +39,12 @@ int main(int argc, char **argv)
 
     // Paramos Contador
     end = clock();
-    cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+    time_tot = ((double)(end - start)) / CLOCKS_PER_SEC;
 
-    printf("TIME: %lf\n", cpu_time_used);
+    getrusage(RUSAGE_SELF, &usage);
 
+    printf("TIME_TOT = %lf\n", time_tot);
+    printf("RSS = %ld\n", usage.ru_maxrss); // Medido en KB
+    printf("PI = %lf\n", estimated_pi);
     return 0;
 }

@@ -79,7 +79,8 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-
+    clock_t start, end;
+    double time_tot;
     long long N = atoll(argv[1]);
 
     srand(time(NULL));
@@ -87,18 +88,16 @@ int main(int argc, char *argv[])
     double **A = alloc_matrix(N);
     double **B = alloc_matrix(N);
     double **C = alloc_matrix(N);
-    
 
     init_lower_triangular(A, N);
     init_random(B, N);
-
-
 
     // Inicializar C a 0
     for (long long i = 0; i < N; i++)
         for (long long j = 0; j < N; j++)
             C[i][j] = 0.0;
 
+    start = clock();
     // Multiplicación de matrices
     for (long long i = 0; i < N; i++)
     {
@@ -111,6 +110,9 @@ int main(int argc, char *argv[])
         }
     }
 
+    end = clock();
+    time_tot = ((double) end - start) / CLOCKS_PER_SEC;
+    
     // Liberar memoria
     free_matrix(A, N);
     free_matrix(B, N);

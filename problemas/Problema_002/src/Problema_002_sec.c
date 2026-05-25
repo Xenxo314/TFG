@@ -2,12 +2,18 @@
 #include <stdlib.h>
 #include <math.h>
 #include <time.h>
+#include <sys/resource.h>
+
 
 int main(int argc, char *argv[])
 {
 
+    clock_t start, end;
+    double time_tot;
     long long N;
-    int num_primos = 0;
+    struct rusage usage; // Tamaño de RSS
+
+    long num_primos = 0;
     if (argc < 2)
     {
         printf("ERROR: Uso ./%s <N>\n", argv[0]);
@@ -15,16 +21,14 @@ int main(int argc, char *argv[])
     }
 
     N = atoll(argv[1]);
-    
-    if (N<2)
+
+    if (N < 2)
     {
         printf("Argumentos inconsistentes\n");
         exit(EXIT_FAILURE);
     }
 
-    
-    
-    clock_t inicio = clock();
+    start = clock();
 
     for (long long i = 2; i <= N; i++)
     {
@@ -43,10 +47,15 @@ int main(int argc, char *argv[])
         }
     }
 
-    clock_t fin = clock();
+    end = clock();
 
-    printf("Num de primos encontrados: %d\n", num_primos);
-    printf("TIME: %f\n", (double)(fin - inicio) / CLOCKS_PER_SEC);
+    time_tot = ((double)end - start) / CLOCKS_PER_SEC;
+    
+    getrusage(RUSAGE_SELF, &usage);
+
+    printf("TIME_TOT = %lf\n", time_tot);
+    printf("RSS = %ld\n", usage.ru_maxrss); // Medido en KB
+    // printf("Num Primos = %ld\n", num_primos);
 
     return 0;
 }
