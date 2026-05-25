@@ -12,6 +12,8 @@ int main(int argc, char **argv)
     long long N_d, N;    // Tamaño del Problema y numero de chunks
     int T;               // Numero de hilos que se usaran
     int p;               // Porcentaje del tamaño del problema que se ejecutará
+    double time_tot;
+    double time_dec;
     struct rusage usage; // Tamaño de RSS
 
     // Comprobación de Parámetros
@@ -73,7 +75,7 @@ int main(int argc, char **argv)
 
 #pragma omp section
         {
-#pragma omp parallel for schedule(dynamic) reduction(+ : estimated_pi_D) num_threads(T/2)
+#pragma omp parallel for schedule(dynamic) reduction(+ : estimated_pi_D) num_threads(T / 2)
             for (long long i = 1; i < N_d; i++)
             {
                 if (*(ptr_winner) != 'X')
@@ -105,13 +107,14 @@ int main(int argc, char **argv)
     estimated_pi = sqrt(estimated_pi);
     end = omp_get_wtime();
 
+    time_dec = end_d - start;
+    time_tot = end - start;
     getrusage(RUSAGE_SELF, &usage);
 
-    printf("WINNER: %c\n", winner);
-    printf("DECISSION_TIME: %f\n", end_d - start);
-    printf("TOTAL_TIME: %f\n", end - start);
-    printf("RSS = %ld\n", usage.ru_maxrss);
-    printf("PI = %.15lf\n", estimated_pi);
+    printf("TIME_TOT = %lf\n", time_tot);
+    printf("TIME_DEC = %lf\n", time_dec);
+    printf("WINNER = %c\n", winner);
+    printf("RSS = %ld\n", usage.ru_maxrss); // Medido en KB
 
     return 0;
 }
