@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <sys/resource.h>
+
 
 double **alloc_matrix(long long N)
 {
@@ -82,6 +84,8 @@ int main(int argc, char *argv[])
     clock_t start, end;
     double time_tot;
     long long N = atoll(argv[1]);
+    struct rusage usage; // Tamaño de RSS
+
 
     srand(time(NULL));
 
@@ -111,8 +115,11 @@ int main(int argc, char *argv[])
     }
 
     end = clock();
-    time_tot = ((double) end - start) / CLOCKS_PER_SEC;
-    
+    getrusage(RUSAGE_SELF, &usage);
+    time_tot = ((double)end - start) / CLOCKS_PER_SEC;
+
+    printf("TIME_TOT = %lf\n", time_tot);
+    printf("RSS = %ld\n", usage.ru_maxrss); // Medido en KB
     // Liberar memoria
     free_matrix(A, N);
     free_matrix(B, N);
