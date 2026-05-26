@@ -152,7 +152,7 @@ int main(int argc, char **argv)
     printf("STD_DEV = %.15lf\n", std_dev);
     printf("DESBALANCEO = %.15lf %%\n", desbalanceo);
     printf("WINNER = %c\n", winner);
-    printf("Max RSS: %ld KB\n", usage.ru_maxrss);
+    printf("RSS = %ld KB\n", usage.ru_maxrss);
 
     // FREE
     free(times);
