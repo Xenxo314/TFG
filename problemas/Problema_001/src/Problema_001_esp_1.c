@@ -19,7 +19,7 @@ int main(int argc, char **argv)
     long long N;    // Tamaño del problema
     int T;          // Numero de hilos
     double p;       // Porcentaje de la decisión
-    long chunk = 0; // Distancia entre iteraciones (De esta manera evitamos errores de medición) [OPT]
+    long chunk = 1; // Distancia entre iteraciones (De esta manera evitamos errores de medición) [OPT]
 
     // MEMORIA
     struct rusage usage; // Tamaño de RSS
