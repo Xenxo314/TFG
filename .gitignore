@@ -1,9 +1,2 @@
-problemas/Problema_001/especulativo/P_001_espec
-problemas/Problema_001/openmp/P_001_omp
-problemas/Problema_001/sequential/P_001
-scripts/Problema_001/P_001_seq
-scripts/Problema_001/P_001_omp
-scripts/P_001_seq
-problemas/Problema_001/sequential/P_001_seq
 pruebas/*
 */execs/*
