@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
+#include <sys/resource.h>
 
 double **alloc_matrix(long long N)
 {
@@ -60,16 +61,16 @@ void print_matrix(double **M, long long N)
 
 int main(int argc, char *argv[])
 {
+    double time_tot;
+    struct rusage usage; // Tamaño de RSS
+    long long N = atoll(argv[1]);
+    int T = atoi(argv[2]);
+
     if (argc < 3)
     {
         printf("Uso: %s N T\n", argv[0]);
         return 1;
     }
-
-    omp_sched_t sched;
-    int chunky = 0;
-    long long N = atoll(argv[1]);
-    int T = atoi(argv[2]);
 
     srand(time(NULL));
 
@@ -87,8 +88,8 @@ int main(int argc, char *argv[])
 
     double start = omp_get_wtime();
 
-    // Multiplicación de matrices
-    #pragma omp parallel for schedule(runtime) num_threads(T)
+// Multiplicación de matrices
+#pragma omp parallel for schedule(runtime) num_threads(T)
     for (long long i = 0; i < N; i++)
     {
         for (long long j = 0; j < N; j++)
@@ -101,7 +102,12 @@ int main(int argc, char *argv[])
     }
     double end = omp_get_wtime();
 
-    printf("TIME: %lf\n", end - start);
+    time_tot = end - start;
+
+    getrusage(RUSAGE_SELF, &usage);
+
+    printf("TIME_TOT = %lf\n", time_tot);
+    printf("RSS = %ld\n", usage.ru_maxrss);
 
     // Liberar memoria
     free_matrix(A, N);

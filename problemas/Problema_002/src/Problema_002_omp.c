@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <omp.h>
 #include <math.h>
+#include <sys/resource.h>
 
 /**
  * En este código comprobaremos los numeros primos que existe en el rango [A,A+B]
@@ -10,9 +11,13 @@
 int main(int argc, char *argv[])
 {
 
-    long long N;           // Parametros para primos
+    long long N;              // Parametros para primos
     int T;                    // Numero de hilos
     long long num_primos = 0; // Numero de primos entre A y A+B
+    double time_tot;
+
+    struct rusage usage; // Tamaño de RSS
+
     if (argc < 3)
     {
         printf("ERROR: Uso ./%s <N> <T>\n", argv[0]);
@@ -20,7 +25,7 @@ int main(int argc, char *argv[])
     }
 
     // Parseo de Argumentos
-    N= atoll(argv[1]);
+    N = atoll(argv[1]);
     T = atoi(argv[2]);
 
     if (N < 2 || T < 1)
@@ -48,9 +53,11 @@ int main(int argc, char *argv[])
         }
     }
     double end = omp_get_wtime();
+    getrusage(RUSAGE_SELF, &usage);
 
-    printf("Num de primos encontrados: %lld\n", num_primos);
-    printf("TIME: %lf\n", end - start);
+    time_tot = end - start;
+    printf("TIME_TOT = %lf\n", time_tot);
+    printf("RSS = %ld\n", usage.ru_maxrss);
 
     return 0;
 }
