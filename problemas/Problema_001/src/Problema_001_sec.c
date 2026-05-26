@@ -45,6 +45,6 @@ int main(int argc, char **argv)
 
     printf("TIME_TOT = %lf\n", time_tot);
     printf("RSS = %ld\n", usage.ru_maxrss); // Medido en KB
-    printf("PI = %lf\n", estimated_pi);
+    // printf("PI = %lf\n", estimated_pi);
     return 0;
 }
