@@ -170,7 +170,7 @@ int main(int argc, char **argv)
     printf("DESBALANCEO = %.15lf\n", desbalanceo);
     printf("WINNER = %c\n", winner);
     printf("Num primos = %lld\n", num_primos);
-    printf("Max RSS = %ld\n", usage.ru_maxrss); // Medido en KB
+    printf("RSS = %ld\n", usage.ru_maxrss); // Medido en KB
 
 
     // FREE

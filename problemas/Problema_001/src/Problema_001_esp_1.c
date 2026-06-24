@@ -59,11 +59,15 @@ int main(int argc, char **argv)
     omp_set_nested(1);      // Activamos el paralelismo Aninado
 
     start = omp_get_wtime();
-#pragma omp parallel sections shared(winner)
+#pragma omp parallel sections shared(winner) private(chunk)
     {
 #pragma omp section
         {
 
+            if (chunk == 0)
+            {
+                chunk = N_d / T;
+            }
 // Cómputo Paralelizable de PI
 #pragma omp parallel for schedule(static, chunk) reduction(+ : estimated_pi_S) num_threads(T / 2)
             for (long long i = 1; i < N_d; i++)
@@ -74,18 +78,25 @@ int main(int argc, char **argv)
                 }
                 estimated_pi_S += 1.0 / (i * (double)i);
             }
-
 #pragma omp critical
             if (winner == 'X')
             {
                 winner = 'S';
                 estimated_pi = estimated_pi_S;
+                if (chunk == 0)
+                {
+                    chunk = N / T;
+                }
                 omp_set_schedule(omp_sched_static, chunk);
             }
         }
 
 #pragma omp section
         {
+            if (chunk == 0)
+            {
+                chunk = 1;
+            }
 #pragma omp parallel for schedule(dynamic, chunk) reduction(+ : estimated_pi_D) num_threads(T / 2)
             for (long long i = 1; i < N_d; i++)
             {

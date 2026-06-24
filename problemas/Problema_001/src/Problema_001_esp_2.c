@@ -71,12 +71,9 @@ int main(int argc, char **argv)
     N = atoll(argv[1]);
     T = atoi(argv[2]);
     p = atof(argv[3]);
-
-    if (argc == 6)
-    {
-        umbral = atoi(argv[4]);
-        chunk = atol(argv[5]);
-    }
+    umbral = atoi(argv[4]);
+    chunk = atol(argv[5]);
+    
 
     N_d = N * p / 100.0f;
 
@@ -145,14 +142,14 @@ int main(int argc, char **argv)
     // Medir memoria
     getrusage(RUSAGE_SELF, &usage);
 
-    printf("PI = %lf\n", estimated_pi);
+    //printf("PI = %lf\n", estimated_pi);
     // PRINTS
     printf("TIME_TOT = %lf\n", time_tot);
     printf("TIME_DEC = %lf\n", time_dec);
     printf("STD_DEV = %.15lf\n", std_dev);
-    printf("DESBALANCEO = %.15lf %%\n", desbalanceo);
+    printf("DESBALANCEO = %.15lf\n", desbalanceo);
     printf("WINNER = %c\n", winner);
-    printf("RSS = %ld KB\n", usage.ru_maxrss);
+    printf("RSS = %ld\n", usage.ru_maxrss);
 
     // FREE
     free(times);

@@ -120,6 +120,7 @@ int main(int argc, char *argv[])
 
     printf("TIME_TOT = %lf\n", time_tot);
     printf("RSS = %ld\n", usage.ru_maxrss); // Medido en KB
+
     // Liberar memoria
     free_matrix(A, N);
     free_matrix(B, N);

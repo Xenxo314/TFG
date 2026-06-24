@@ -67,12 +67,16 @@ int main(int argc, char *argv[])
     }
 
     start = omp_get_wtime();
-#pragma omp parallel sections
+#pragma omp parallel sections private(chunk)
     {
 #pragma omp section
         {
+            if (chunk == 0)
+            {
+                chunk = N_d / T;
+            }
             omp_set_num_threads(T / 2);
-#pragma omp parallel for schedule(static, chunk) reduction(+ : num_primos_S) num_threads(T / 2)
+#pragma omp parallel for schedule(static, chunk) reduction(+ : num_primos_S) num_threads(T / 2) 
             for (long long i = 2; i < N_d; i++)
             {
                 int isprime = 1; // Todo numero es primo hasta que se demuestre lo contrario
@@ -95,12 +99,20 @@ int main(int argc, char *argv[])
                 if (*(ptr_winner) == 'X')
                 {
                     winner = 'S';
+                    if (chunk == 0)
+                    {
+                        chunk = N / T;
+                    }
                     omp_set_schedule(omp_sched_static, chunk);
                 }
             }
         }
 #pragma omp section
         {
+            if (chunk == 0)
+            {
+                chunk = 1;
+            }
             omp_set_num_threads(T / 2);
 #pragma omp parallel for schedule(dynamic, chunk) reduction(+ : num_primos_D) num_threads(T / 2)
             for (long long i = 2; i < N_d; i++)
